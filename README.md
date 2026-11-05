@@ -82,7 +82,7 @@ flowchart TD
 
 1. **Clonar o repositório:**
    ```bash
-   git clone https://github.com/<seu-usuario>/devops-python-api.git
+   git clone https://github.com/Arthur-borges-ceub/devops-python-api.git
    cd devops-python-api
    ```
 
@@ -252,3 +252,4 @@ Para validar a versão em execução diretamente no ambiente implantado:
 - A instância EC2 utiliza uma **IAM Role** com política restrita de leitura (`AmazonEC2ContainerRegistryReadOnly`) para baixar imagens do ECR.
 - As credenciais temporárias de CI/CD para publicação no ECR e acesso à EC2 são injetadas estritamente por meio de **GitHub Secrets**.
 - A imagem Docker é executada sob um usuário não-root (`appuser`), mitigando riscos de escalonamento de privilégios.
+

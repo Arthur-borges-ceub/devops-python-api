@@ -143,7 +143,7 @@ git add app.py requirements.txt tests/ .gitignore
 git commit -m "feat: implementacao inicial da API Flask e testes unitarios"
 
 # Conectar ao seu repositorio remoto no GitHub
-git remote add origin https://github.com/<SEU_USUARIO_GITHUB>/devops-python-api.git
+git remote add origin https://github.com/Arthur-borges-ceub/devops-python-api.git
 
 # Enviar para a main
 git push -u origin main
@@ -278,3 +278,4 @@ Após a apresentação/avaliação do professor:
 1. **EC2:** Selecione a instância `devops-python-api-server` > **Instance state** > **Terminate instance**.
 2. **ECR:** Vá em Repositories > selecione `devops-python-api` > clique em **Delete**.
 3. **IAM:** Exclua as chaves de acesso do usuário `github-actions-deployer` e a Role `EC2-ECR-ReadOnly-Role`.
+
