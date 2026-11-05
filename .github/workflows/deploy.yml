@@ -70,49 +70,50 @@ jobs:
 
       - name: Deploy to Amazon EC2 via SSH
         uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG,AWS_REGION
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-        script: |
-          set -e
-          echo "=========================================================="
-          echo "Iniciando processo de deploy na instancia Amazon EC2"
-          echo "=========================================================="
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG,AWS_REGION
+          script: |
+            set -e
+            echo "=========================================================="
+            echo "Iniciando processo de deploy na instancia Amazon EC2"
+            echo "=========================================================="
 
-          echo "[1/6] Autenticando Docker no Amazon ECR via IAM Role da EC2..."
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+            echo "[1/6] Autenticando Docker no Amazon ECR via IAM Role da EC2..."
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-          echo "[2/6] Baixando a nova imagem correspondente ao commit ($IMAGE_TAG)..."
-          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            echo "[2/6] Baixando a nova imagem correspondente ao commit ($IMAGE_TAG)..."
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-          echo "[3/6] Interrompendo e removendo versao anterior do container..."
-          docker stop devops-python-api || true
-          docker rm devops-python-api || true
+            echo "[3/6] Interrompendo e removendo versao anterior do container..."
+            docker stop devops-python-api || true
+            docker rm devops-python-api || true
 
-          echo "[4/6] Executando novo container na porta 80..."
-          docker run -d \
-            --name devops-python-api \
-            --restart always \
-            -p 80:5000 \
-            $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            echo "[4/6] Executando novo container na porta 80..."
+            docker run -d \
+              --name devops-python-api \
+              --restart always \
+              -p 80:5000 \
+              $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-          echo "[5/6] Aguardando inicializacao e verificando container..."
-          sleep 5
-          docker ps -f name=devops-python-api
+            echo "[5/6] Aguardando inicializacao e verificando container..."
+            sleep 5
+            docker ps -f name=devops-python-api
 
-          echo "[6/6] Realizando verificacao de saude local (Healthcheck)..."
-          curl -f http://localhost:80/health || (echo "Healthcheck falhou!" && exit 1)
+            echo "[6/6] Realizando verificacao de saude local (Healthcheck)..."
+            curl -f http://localhost:80/health || (echo "Healthcheck falhou!" && exit 1)
 
-          echo "Limpando imagens antigas..."
-          docker image prune -f || true
+            echo "Limpando imagens antigas..."
+            docker image prune -f || true
 
-          echo "=========================================================="
-          echo "Deploy realizado com sucesso! Versao ativa: $IMAGE_TAG"
-          echo "=========================================================="
+            echo "=========================================================="
+            echo "Deploy realizado com sucesso! Versao ativa: $IMAGE_TAG"
+            echo "=========================================================="
+
