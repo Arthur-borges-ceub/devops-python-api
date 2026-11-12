@@ -46,9 +46,6 @@ jobs:
     name: 2. Construir e Publicar Imagem no Amazon ECR
     needs: test
     runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.set-tag.outputs.tag }}
-      ecr_registry: ${{ steps.login-ecr.outputs.registry }}
 
     steps:
       - name: Obter o código do repositório
@@ -66,15 +63,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Definir tag da imagem com o hash do commit
-        id: set-tag
-        run: echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
-
       - name: Construir, identificar e enviar imagem ao Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ steps.set-tag.outputs.tag }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           echo "Construindo imagem Docker..."
           docker build \
@@ -105,9 +98,9 @@ jobs:
             echo "   INICIANDO IMPLANTAÇÃO AUTOMATIZADA NA EC2      "
             echo "=================================================="
 
-            REGISTRY="${{ needs.build-and-push.outputs.ecr_registry }}"
+            REGISTRY="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com"
             REPOSITORY="${{ secrets.ECR_REPOSITORY }}"
-            IMAGE_TAG="${{ needs.build-and-push.outputs.image_tag }}"
+            IMAGE_TAG="${{ github.sha }}"
             FULL_IMAGE="$REGISTRY/$REPOSITORY:$IMAGE_TAG"
 
             echo ">> 1. Autenticando o Docker da instância no Amazon ECR via IAM Role..."
