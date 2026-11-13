@@ -120,6 +120,7 @@ jobs:
               --name devops-python-api \
               --restart unless-stopped \
               -p 8000:8000 \
+              -p 80:8000 \
               $FULL_IMAGE
 
             echo ">> 5. Verificando integridade e funcionamento da aplicação..."
